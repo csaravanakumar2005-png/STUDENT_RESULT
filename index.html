@@ -1,171 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Student Result Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Performance Calculator</title>
 
-<style>
-    body {
-        font-family: Arial;
-        background: linear-gradient(to right, #4facfe, #00f2fe);
-        text-align: center;
-        padding: 20px;
-    }
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-    h1 {
-        color: white;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
 
-    .container {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        width: 350px;
-        margin: auto;
-        box-shadow: 0 0 15px rgba(0,0,0,0.3);
-    }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 600px;
+            animation: fadeIn 0.8s ease-out;
+        }
 
-    table {
-        width: 100%;
-        margin-bottom: 15px;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    th {
-        background: #4facfe;
-        color: white;
-        padding: 10px;
-    }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
 
-    td {
-        padding: 8px;
-    }
+        /* TABLE DESIGN */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-    input {
-        width: 60px;
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
+        th {
+            padding: 12px;
+            text-align: left;
+            color: white;
+            background: linear-gradient(45deg, #4a90e2, #6a5acd);
+        }
 
-    button {
-        background: #4facfe;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
 
-    button:hover {
-        background: #00c6ff;
-        transform: scale(1.1);
-    }
+        tbody tr:nth-child(odd) {
+            background-color: #f9fbff;
+        }
 
-    /* Loading Spinner */
-    .loader {
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid #4facfe;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin: 15px auto;
-        display: none;
-    }
+        tbody tr:nth-child(even) {
+            background-color: #eef3ff;
+        }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+        tbody tr:hover {
+            background-color: #dbe5ff;
+            transform: scale(1.01);
+            transition: 0.3s;
+        }
 
-    #result {
-        margin-top: 15px;
-        font-weight: bold;
-        display: none;
-    }
-</style>
+        tr {
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74,144,226,0.3);
+        }
+
+        /* Error animation */
+        .error {
+            border-color: red !important;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Failed row */
+        .fail-row {
+            background-color: #ffe6e6 !important;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background-color: #357abd;
+        }
+
+        /* Ripple */
+        button::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        button:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
+            transition: 0.4s;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            margin: 15px auto;
+            border: 5px solid #eee;
+            border-top: 5px solid #4a90e2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        #result-area {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>🎓 Student Result Calculator</h1>
-
 <div class="container">
+    <h2>Student Result Calculator</h2>
 
-<table border="1" cellpadding="10" cellspacing="5">
-<tr><th>Subject</th><th>Marks</th></tr>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject Name</th>
+                <th>Marks (0-100)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Optimization Techniques</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Probability & Statistics</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Machine Learning</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Database Management Systems</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Digital Logic & Computer Org.</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Design Thinking & Innovation</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Machine Learning - Lab</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>DBMS - Lab</td><td><input type="number" class="marks"></td></tr>
+            <tr><td>Full Stack Development - 1 Lab</td><td><input type="number" class="marks"></td></tr>
+        </tbody>
+    </table>
 
-<tr><td></td>Optimization Techniques<td><input type="number" class="mark" min="0" max="100"></td></tr>
-<tr><td></td>Probability & Statistics<td><input type="number" class="mark"></td></tr>
-<tr><td></td>Machine Learning<td><input type="number" class="mark"></td></tr>
-<tr><td></td>Database Management Systems<td><input type="number" class="mark"></td></tr>
-<tr><td></td>Digital Logic and Computer Organization<td><input type="number" class="mark"></td></tr>
-<tr><td></td>Design Thinking & Innovation<td><input type="number" class="mark"></td></tr>
+    <div class="btn-container">
+        <button onclick="calculateResult()">Calculate Results</button>
+    </div>
 
-<tr><td></td>Full Stack Development -I LAB<td><input type="number" class="mark"></td></tr>
-<tr><td>Machine Leaming - Lab</td><td><input type="number" class="mark"></td></tr>
-<tr><td>Database Management Systems - LAB</td><td><input type="number" class="mark"></td></tr>
+    <div class="loader" id="loader"></div>
 
-</table>
-
-<button onclick="showLoading()">Calculate</button>
-
-<div class="loader" id="loader"></div>
-
-<div id="result"></div>
-
+    <div id="result-area">
+        <div class="stat-row"><strong>Total Marks:</strong> <span id="total">0</span>/900</div>
+        <div class="stat-row"><strong>Percentage:</strong> <span id="percentage">0</span>%</div>
+        <div class="stat-row"><strong>Final Result:</strong> <span id="status">N/A</span></div>
+    </div>
 </div>
 
 <script>
-function showLoading() {
-    let marks = document.querySelectorAll(".mark");
+function animateValue(id, start, end, duration) {
+    let obj = document.getElementById(id);
+    let range = end - start;
+    let startTime = null;
 
-    // Validation first
-    for (let i = 0; i < marks.length; i++) {
-        let value = parseInt(marks[i].value);
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        let progress = timestamp - startTime;
+        let value = Math.min(progress / duration * range + start, end);
+        obj.innerText = value.toFixed(2);
 
-        if (isNaN(value) || value < 0 || value > 100) {
-            alert("❌ Enter marks between 0 and 100");
-            return;
+        if (progress < duration) {
+            requestAnimationFrame(step);
         }
     }
-
-    document.getElementById("result").style.display = "none";
-    document.getElementById("loader").style.display = "block";
-
-    // Delay result (simulate loading)
-    setTimeout(calculateResult, 2000);
+    requestAnimationFrame(step);
 }
 
 function calculateResult() {
-    let marks = document.querySelectorAll(".mark");
+    const inputs = document.querySelectorAll('.marks');
     let total = 0;
-    let fail = false;
+    let isPass = true;
+    let valid = true;
 
-    for (let i = 0; i < marks.length; i++) {
-        let value = parseInt(marks[i].value);
+    document.querySelectorAll("tr").forEach(r => r.classList.remove("fail-row"));
 
-        if (value < 40) {
-            fail = true;
+    inputs.forEach(input => {
+        let val = parseFloat(input.value);
+
+        if (isNaN(val) || val < 0 || val > 100) {
+            valid = false;
+            input.classList.add("error");
+        } else {
+            input.classList.remove("error");
+            total += val;
+
+            if (val < 40) {
+                isPass = false;
+                input.closest("tr").classList.add("fail-row");
+            }
         }
+    });
 
-        total += value;
+    if (!valid) {
+        alert("Enter marks between 0 to 100 only!");
+        return;
     }
 
-    let percentage = (total / 900) * 100;
-    let resultText = fail ? "Fail ❌" : "Pass ✅";
+    const loader = document.getElementById("loader");
+    const resultArea = document.getElementById("result-area");
 
-    document.getElementById("loader").style.display = "none";
+    loader.style.display = "block";
+    resultArea.style.display = "none";
 
-    let resultDiv = document.getElementById("result");
-    resultDiv.style.display = "block";
+    setTimeout(() => {
+        loader.style.display = "none";
 
-    resultDiv.innerHTML = `
-        Total Marks: ${total} / 900 <br>
-        Percentage: ${percentage.toFixed(2)}% <br>
-        Result: ${resultText}
-    `;
+        let percentage = (total / 900) * 100;
+
+        animateValue("total", 0, total, 800);
+        animateValue("percentage", 0, percentage, 800);
+
+        const status = document.getElementById("status");
+        resultArea.style.display = "block";
+
+        if (isPass) {
+            status.innerText = "PASS 🎉";
+            resultArea.className = "pass";
+        } else {
+            status.innerText = "FAIL ❌";
+            resultArea.className = "fail";
+        }
+
+    }, 1200);
 }
 </script>
 
